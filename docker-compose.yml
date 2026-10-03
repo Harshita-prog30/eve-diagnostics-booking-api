@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:16
+    environment: { POSTGRES_USER: eve, POSTGRES_PASSWORD: eve, POSTGRES_DB: eve }
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U eve"], interval: 3s, retries: 10 }
+    volumes: [pgdata:/var/lib/postgresql/data]
+  api:
+    build: .
+    ports: ["8000:8000"]
+    environment:
+      DATABASE_URL: postgresql+psycopg2://eve:eve@db:5432/eve
+      JWT_SECRET: change-me-in-prod
+      WEBHOOK_SECRET: whsec_dev
+    depends_on: { db: { condition: service_healthy } }
+volumes: { pgdata: {} }
